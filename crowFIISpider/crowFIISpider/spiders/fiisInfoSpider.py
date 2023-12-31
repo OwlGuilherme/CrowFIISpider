@@ -2,8 +2,8 @@ from typing import Any, Iterable, Optional
 import scrapy
 import pandas as pd
 from scrapy.http import Request
-from crowFIISpider.utils.database import carregar_links
-from crowFIISpider.utils.tratamento_dados import converte_valor, substituir_virgula, trata_variacao, extrair_variacao
+from crowFIISpider.utils.database import carregar_links, inserir_dados_detalhados
+from crowFIISpider.utils.tratamento_dados import extrair_variacao
 
 
 class FiisinfospiderSpider(scrapy.Spider):
@@ -50,6 +50,11 @@ class FiisinfospiderSpider(scrapy.Spider):
             'tipo_gestao' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[8]/b/text()').get(),
             'publico_alvo' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[9]/b/text()').get()
         }
+
+        detalhes['fii_id'] = response.meta['fii_id']
+        inserir_dados_detalhados(detalhes)
+
+
 
 
     def extrair_dados_tabela_yield(response):
