@@ -6,25 +6,33 @@ class FiisSpider(scrapy.Spider):
     start_urls = ["https://fiis.com.br/lista-de-fundos-imobiliarios/"]
 
     def parse(self, response):
-        fiis_a_elements = response.css('.tickerFilter__results__box-A [data-element="content-list-ticker"]')
+        # Encontrar todas as classes correspondentes às letras
+        classes_letras = response.css('.tickerFilter__results__box').re(r'tickerFilter__results__box-(\w)')
 
-        for fii_element in fiis_a_elements:
-            titulo = fii_element.css('.tickerBox__title::text').get()
-            link = fii_element.css('.tickerBox__link_ticker::attr(href)').get()
-            tipo = fii_element.css('.tickerBox__type::text').get()
-            descricao = fii_element.css('.tickerBox__desc::text').get()
+        for classe_letra in classes_letras:
+            # Construir o seletor dinâmico para a letra atual
+            seletor_letra = f'.tickerFilter__results__box-{classe_letra} [data-element="content-list-ticker"]'
 
-            yield {
-                'titulo': titulo,
-                'link': link,
-                'tipo': tipo,                
-                'descricao': descricao
-            }
-            
-            # Inserir dados no banco de dados
-            inserir_dados({
-                'titulo': titulo,
-                'link': link,
-                'tipo': tipo,
-                'descricao': descricao
-            })
+            # Encontrar os elementos para a letra atual
+            fiis_letra_elements = response.css(seletor_letra)
+
+            for fii_element in fiis_letra_elements:
+                titulo = fii_element.css('.tickerBox__title::text').get()
+                link = fii_element.css('.tickerBox__link_ticker::attr(href)').get()
+                tipo = fii_element.css('.tickerBox__type::text').get()
+                descricao = fii_element.css('.tickerBox__desc::text').get()
+
+                yield {
+                    'titulo': titulo,
+                    'link': link,
+                    'tipo': tipo,                
+                    'descricao': descricao
+                }
+
+                # Inserir dados no banco de dados
+                inserir_dados({
+                    'titulo': titulo,
+                    'link': link,
+                    'tipo': tipo,
+                    'descricao': descricao
+                })
