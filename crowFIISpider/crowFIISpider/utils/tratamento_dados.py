@@ -40,3 +40,22 @@ def extrair_variacao(variacao_element):
         return float(variacao_texto.strip('%').replace(',', '.'))
     elif 'down' in variacao_element.attrib['class']:
         return -float(variacao_texto.strip('%').replace(',', '.'))
+
+def remover_ponto(numero_com_ponto):
+    return numero_com_ponto.replace('.', '')
+
+
+def tratar_detalhes(detalhes):
+    detalhes_tratados = {}
+
+    for chave, valor in detalhes.items():
+        if chave in ['dividend_yield', 'ultimo_rendimento', 'P/VP', 'cotacao_atual', 'mudança', 'min_52_seman',  'max_52_seman', 'variacao',  'liquidez_media_diaria', 'valor_patrimonial_P_cota', 'participacao_ifix', ]:
+            detalhes_tratados[chave] = substituir_virgula(valor)
+
+        elif chave in ['patrimonio_liquido', 'valor_em_caixa']:
+            detalhes_tratados[chave] = converte_valor(valor)
+
+        elif chave in ['num_cotistas', 'num_cotas', 'patrimonio']:
+            detalhes_tratados[chave] = remover_ponto(valor)
+
+    return detalhes_tratados
