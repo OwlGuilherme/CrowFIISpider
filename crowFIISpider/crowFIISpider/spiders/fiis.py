@@ -17,22 +17,22 @@ class FiisSpider(scrapy.Spider):
             fiis_letra_elements = response.css(seletor_letra)
 
             for fii_element in fiis_letra_elements:
-                titulo = fii_element.css('.tickerBox__title::text').get()
+                ticker = fii_element.css('.tickerBox__title::text').get()
                 link = fii_element.css('.tickerBox__link_ticker::attr(href)').get()
                 tipo = fii_element.css('.tickerBox__type::text').get()
-                descricao = fii_element.css('.tickerBox__desc::text').get()
+                nome = fii_element.css('.tickerBox__desc::text').get()
 
                 yield {
-                    'titulo': titulo,
+                    'ticker': ticker,
                     'link': link,
                     'tipo': tipo,                
-                    'descricao': descricao
+                    'nome': nome
                 }
 
                 # Inserir dados no banco de dados
                 inserir_dados({
-                    'titulo': titulo,
+                    'ticker': ticker,
                     'link': link,
                     'tipo': tipo,
-                    'descricao': descricao
+                    'nome': nome
                 })
