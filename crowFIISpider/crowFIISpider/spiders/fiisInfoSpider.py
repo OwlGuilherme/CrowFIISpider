@@ -21,7 +21,7 @@ class FiisinfospiderSpider(scrapy.Spider):
         variacao_element = response.css('.variation')
 
         detalhes = {
-            'ticker' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[1]/p/text()').get(),
+            'ticker' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[1]/h1/text()').get(),
             'nome' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[1]/p/text()').get(),
             'dividend_yield' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[2]/div/div[1]/p[1]/b/text()').get(),
             'ultimo_rendimento' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[2]/div/div[2]/p[1]/b/text()').get(),
