@@ -61,3 +61,20 @@ class FiisinfospiderSpider(scrapy.Spider):
             }
 
 
+    def extrair_dados_tabela_yield(response):
+        dados = []
+
+        for row in response.css(".yieldChart__table__bloco"):
+            dado = {
+                "Data Base": row.css(".table__linha:nth-child(1)::text").get(),
+                "Data Pagamento": row.css(".table__linha:nth-child(2)::text").get(),
+                "Cotação Base": row.css(".table__linha:nth-child(3)::text").get(),
+                "Dividend Yield": row.css(".table__linha:nth-child(4)::text").get(),
+                "Rendimento": row.css(".table__linha:nth-child(5)::text").get(),
+            }
+            dados.append(dado)
+
+        # Criando um DataFrame do Pandas
+        df = pd.DataFrame(dados)
+        return df
+
