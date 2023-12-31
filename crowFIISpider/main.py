@@ -1,5 +1,6 @@
 from scrapy.crawler import CrawlerProcess
 from crowFIISpider.spiders.fiis import FiisSpider
+from crowFIISpider.spiders.fiisInfoSpider import FiisinfospiderSpider
 from crowFIISpider.utils.database import criar_db, inserir_dados
 from scrapy.utils.project import get_project_settings
 
@@ -8,16 +9,21 @@ def raspar_dados():
     process.crawl(FiisSpider)
     process.start()
 
+def raspar_dados_detalhados():
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(FiisinfospiderSpider)
+    process.start()
+
 def exibir_menu():
-    print("+---------------------------+")
-    print("|        FiisSpider        |")
-    print("+---------------------------+")
-    print("|  O que deseja fazer?      |")
-    print("+- - - - - - - - - - - - - -+")
-    print("| 1. Raspar dados novamente |")
-    print("| 2. Opção futura           |")
-    print("| 3. Sair                   |")
-    print("+---------------------------+")
+    print("+-----------------------------+")
+    print("|          FiisSpider         |")
+    print("+-----------------------------+")
+    print("|  O que deseja fazer?        |")
+    print("+- - - - - - - - - - - - - - -+")
+    print("| 1. Raspar dados novamente   |")
+    print("| 2. Raspar dados detalhados  |")
+    print("| 3. Sair                     |")
+    print("+-----------------------------+")
 
 def main():
     criar_db()  # Certifique-se de que o banco de dados está criado antes de exibir o menu
@@ -29,7 +35,7 @@ def main():
         if opcao == "1":
             raspar_dados()
         elif opcao == "2":
-            print("Opção futura")
+            raspar_dados_detalhados()
         elif opcao == "3":
             print("Saindo...")
             break
