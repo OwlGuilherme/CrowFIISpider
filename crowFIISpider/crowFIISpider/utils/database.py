@@ -73,32 +73,82 @@ def carregar_links():
 def inserir_dados_detalhados(detalhes_fii_data):
     try:
         with sqlite3.connect('fiis.db') as conn:
-            conn.execute('''
-                INSERT INTO detalhes_fiis (
-                    fii_id, ticker, nome, dividend_yield, ultimo_rendimento, patrimonio_liquido,
-                    pvp, cotacao_atual, mudanca, min_52_seman, max_52_seman, variacao,
-                    valor_em_caixa, liquidez_media_diaria, valor_patrimonial_p_cota,
-                    num_cotistas, participacao_ifix, administrador, cnpj_adm, cnpj,
-                    nome_pregao, num_cotas, patrimonio, tipo_anbima, segmen_anbima,
-                    segmento, tipo_gestao, publico_alvo
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            # Verificar se os dados já existem no banco de dados
+            existing_data = conn.execute('''
+                SELECT id FROM detalhes_fiis
+                WHERE fii_id = ? AND ticker = ? AND nome = ?
             ''', (
-                detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome'],
-                detalhes_fii_data['dividend_yield'], detalhes_fii_data['ultimo_rendimento'],
-                detalhes_fii_data['patrimonio_liquido'], detalhes_fii_data['P/VP'],
-                detalhes_fii_data['cotacao_atual'], detalhes_fii_data['mudanca'],
-                detalhes_fii_data['min_52_seman'], detalhes_fii_data['max_52_seman'],
-                detalhes_fii_data['variacao'], detalhes_fii_data['valor_em_caixa'],
-                detalhes_fii_data['liquidez_media_diaria'], detalhes_fii_data['valor_patrimonial_P_cota'],
-                detalhes_fii_data['num_cotistas'], detalhes_fii_data['participacao_ifix'],
-                detalhes_fii_data['administrador'], detalhes_fii_data['cnpj_adm'],
-                detalhes_fii_data['cnpj'], detalhes_fii_data['nome_pregao'],
-                detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
-                detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
-                detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
-                detalhes_fii_data['publico_alvo']
-            ))
+                detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome']
+            )).fetchone()
+
+            if existing_data:
+                # Se os dados já existem, atualize-os em vez de inseri-los novamente
+                conn.execute('''
+                    UPDATE detalhes_fiis
+                    SET dividend_yield = ?, ultimo_rendimento = ?, patrimonio_liquido = ?,
+                        pvp = ?, cotacao_atual = ?, mudanca = ?, min_52_seman = ?,
+                        max_52_seman = ?, variacao = ?, valor_em_caixa = ?,
+                        liquidez_media_diaria = ?, valor_patrimonial_p_cota = ?,
+                        num_cotistas = ?, participacao_ifix = ?, administrador = ?,
+                        cnpj_adm = ?, cnpj = ?, nome_pregao = ?, num_cotas = ?,
+                        patrimonio = ?, tipo_anbima = ?, segmen_anbima = ?,
+                        segmento = ?, tipo_gestao = ?, publico_alvo = ?
+                    WHERE id = ?
+                ''', (
+                    detalhes_fii_data['dividend_yield'], detalhes_fii_data['ultimo_rendimento'],
+                    detalhes_fii_data['patrimonio_liquido'], detalhes_fii_data['P/VP'],
+                    detalhes_fii_data['cotacao_atual'], detalhes_fii_data['mudanca'],
+                    detalhes_fii_data['min_52_seman'], detalhes_fii_data['max_52_seman'],
+                    detalhes_fii_data['variacao'], detalhes_fii_data['valor_em_caixa'],
+                    detalhes_fii_data['liquidez_media_diaria'], detalhes_fii_data['valor_patrimonial_P_cota'],
+                    detalhes_fii_data['num_cotistas'], detalhes_fii_data['participacao_ifix'],
+                    detalhes_fii_data['administrador'], detalhes_fii_data['cnpj_adm'],
+                    detalhes_fii_data['cnpj'], detalhes_fii_data['nome_pregao'],
+                    detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
+                    detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
+                    detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
+                    detalhes_fii_data['publico_alvo'], existing_data[0]
+                ))
+            else:
+                # Se os dados não existem, insira-os normalmente
+                conn.execute('''
+                    INSERT INTO detalhes_fiis (
+                        fii_id, ticker, nome, dividend_yield, ultimo_rendimento, patrimonio_liquido,
+                        pvp, cotacao_atual, mudanca, min_52_seman, max_52_seman, variacao,
+                        valor_em_caixa, liquidez_media_diaria, valor_patrimonial_p_cota,
+                        num_cotistas, participacao_ifix, administrador, cnpj_adm, cnpj,
+                        nome_pregao, num_cotas, patrimonio, tipo_anbima, segmen_anbima,
+                        segmento, tipo_gestao, publico_alvo
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome'],
+                    detalhes_fii_data['dividend_yield'], detalhes_fii_data['ultimo_rendimento'],
+                    detalhes_fii_data['patrimonio_liquido'], detalhes_fii_data['P/VP'],
+                    detalhes_fii_data['cotacao_atual'], detalhes_fii_data['mudanca'],
+                    detalhes_fii_data['min_52_seman'], detalhes_fii_data['max_52_seman'],
+                    detalhes_fii_data['variacao'], detalhes_fii_data['valor_em_caixa'],
+                    detalhes_fii_data['liquidez_media_diaria'], detalhes_fii_data['valor_patrimonial_P_cota'],
+                    detalhes_fii_data['num_cotistas'], detalhes_fii_data['participacao_ifix'],
+                    detalhes_fii_data['administrador'], detalhes_fii_data['cnpj_adm'],
+                    detalhes_fii_data['cnpj'], detalhes_fii_data['nome_pregao'],
+                    detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
+                    detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
+                    detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
+                    detalhes_fii_data['publico_alvo']
+                ))
             conn.commit()
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
+
+def criar_tabela_detalhes_dividendos(conn, ticker):
+    # Criação da tabela secundária para detalhes de dividendos
+    conn.execute(f'''
+        CREATE TABLE IF NOT EXISTS {ticker}_detalhes_dividendos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fii_id INTEGER,
+            dividend_yield REAL,
+            ultimo_rendimento REAL,
+            FOREIGN KEY(fii_id) REFERENCES fiis(id)
+        )
+    ''')
