@@ -31,3 +31,12 @@ def trata_variacao(variacao_element):
         variacao_numerica *= -1
 
     return variacao_numerica
+
+def extrair_variacao(variacao_element):
+    
+    variacao_texto = variacao_element.css('::text').get()
+
+    if 'up' in variacao_element.attrib['class']:
+        return float(variacao_texto.strip('%').replace(',', '.'))
+    elif 'down' in variacao_element.attrib['class']:
+        return -float(variacao_texto.strip('%').replace(',', '.'))
