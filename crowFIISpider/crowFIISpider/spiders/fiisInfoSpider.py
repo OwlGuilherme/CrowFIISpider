@@ -3,7 +3,7 @@ import scrapy
 import pandas as pd
 from scrapy.http import Request
 from crowFIISpider.utils.database import carregar_links
-from crowFIISpider.utils.tratamento_dados import converte_valor, substituir_virgula
+from crowFIISpider.utils.tratamento_dados import converte_valor, substituir_virgula, trata_variacao, extrair_variacao
 
 
 class FiisinfospiderSpider(scrapy.Spider):
@@ -14,18 +14,11 @@ class FiisinfospiderSpider(scrapy.Spider):
 
         for index, row in links_df.iterrows():
             yield scrapy.Request(url=row['link'], callback=self.parse, meta={'fii_id': row['id']})
+
     
     def parse(self, response):
 
-
-        # Verifica se a variação foi positiva ou negativa
         variacao_element = response.css('.variation')
-        variacao_texto = variacao_element.css('::text').get()
-
-        if 'up' in variacao_element.attrib['class']:
-            variacao = float(variacao_texto.strip('%').replace(',', '.'))
-        elif 'down' in variacao_element.attrib['class']:
-            variacao = -float(variacao_texto.strip('%').replace(',', '.'))
 
         detalhes = {
             'ticker' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[1]/p/text()').get(),
@@ -38,7 +31,8 @@ class FiisinfospiderSpider(scrapy.Spider):
             'mudanca' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[1]/div[1]/div/span/text()').get(),
             'min_52_seman' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[2]/div[1]/span[2]/text()') .get(),
             'max_52_seman' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[3]/div[1]/span[2]/text()').get(),
-            'variacao' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[4]/div[1]/span/text()').get(),
+            # A variação é estraída de forma diversa vista que o elemento é dinâmico a depender do caso.
+            'variacao': extrair_variacao(variacao_element),
             'valor_em_caixa' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[2]/div[1]/p[1]/b/text()').get(),
             'liquidez_media_diaria': response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[2]/div[2]/p[1]/b/text()').get(),
             'valor_patrimonial_P_cota': response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[2]/div[3]/p[1]/b/text()').get(),
@@ -56,5 +50,14 @@ class FiisinfospiderSpider(scrapy.Spider):
             'tipo_gestao' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[8]/b/text()').get(),
             'publico_alvo' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[9]/b/text()').get()
         }
+
+        for row in response.css(".yieldChart__table__bloco"):
+            yield {
+                "Data Base": row.css(".table__linha:nth-child(1)::text").get(),
+                "Data Pagamento": row.css(".table__linha:nth-child(2)::text").get(),
+                "Cotação Base": row.css(".table__linha:nth-child(3)::text").get(),
+                "Dividend Yield": row.css(".table__linha:nth-child(4)::text").get(),
+                "Rendimento": row.css(".table__linha:nth-child(5)::text").get(),
+            }
 
 
