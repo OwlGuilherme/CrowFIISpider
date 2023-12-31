@@ -28,7 +28,7 @@ class FiisinfospiderSpider(scrapy.Spider):
             'patrimonio_liquido' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[2]/div/div[3]/p[1]/b/text()').get(),
             'P/VP' : response.xpath('//*[@id="carbon_fields_fiis_header-2"]/div/div/div[1]/div[2]/div/div[4]/p[1]/b/text()').get(),
             'cotacao_atual' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[1]/div[1]/span[2]/text()').get(),
-            'mudanca' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[1]/div[1]/div/span/text()').get(),
+            'mudanca' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[1]/div[1]/div/span/text()').get().strip(),
             'min_52_seman' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[2]/div[1]/span[2]/text()') .get(),
             'max_52_seman' : response.xpath('//*[@id="carbon_fields_fiis_quotations_chart-2"]/div[1]/div[2]/div[3]/div[1]/span[2]/text()').get(),
             # A variação é estraída de forma diversa vista que o elemento é dinâmico a depender do caso.
@@ -53,8 +53,6 @@ class FiisinfospiderSpider(scrapy.Spider):
 
         detalhes['fii_id'] = response.meta['fii_id']
         inserir_dados_detalhados(detalhes)
-
-
 
 
     def extrair_dados_tabela_yield(response):
