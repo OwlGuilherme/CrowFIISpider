@@ -46,7 +46,7 @@ class FiisinfospiderSpider(scrapy.Spider):
             'patrimonio' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[4]/b/text()').get(),
             'tipo_anbima' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[4]/b/text()').get(),
             'segmen_anbima' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[6]/b/text()').get(),
-            'segmento' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[7]/span/text()').get(),
+            'segmento' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[7]/b/text()').get(),
             'tipo_gestao' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[8]/b/text()').get(),
             'publico_alvo' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[9]/b/text()').get()
         }
