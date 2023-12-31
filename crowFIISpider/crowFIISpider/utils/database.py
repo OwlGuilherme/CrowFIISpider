@@ -141,7 +141,7 @@ def inserir_dados_detalhados(detalhes_fii_data):
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
 
-def criar_tabela_detalhes_dividendos(conn, ticker):
+def criar_tabela_dividendos(conn, ticker):
     # Criação da tabela secundária para detalhes de dividendos
     conn.execute(f'''
         CREATE TABLE IF NOT EXISTS {ticker}_detalhes_dividendos (
@@ -152,3 +152,25 @@ def criar_tabela_detalhes_dividendos(conn, ticker):
             FOREIGN KEY(fii_id) REFERENCES fiis(id)
         )
     ''')
+
+def salvar_tabela_dividendos(conn, ticker, dados_tabela_yield):
+    result = conn.execute(f'SELECT id FROM fiis WHERE ticker = ? LIMIT 1', (ticker,)).fetchone()
+
+    if not result:
+        conn.execute(f'''
+            INSERT INTO fiis (ticker, link, tipo, nome)
+            VALUES (?, ?, ?, ?)
+        ''', (ticker, 'link_do_fii', 'tipo_do_fii', 'nome_do_fii'))
+
+        # Obter o ID do FII
+    fii_id = conn.execute(f'SELECT id FROM fiis WHERE ticker = ? LIMIT 1', (ticker,)).fetchone()[0]
+
+    # Criação da tabela de detalhes de dividendos, se não existir
+    salvar_tabela_dividendos(conn, ticker)
+
+    # Inserir dados na tabela de detalhes de dividendos
+    for _, row in dados_tabela_yield.iterrows():
+        conn.execute(f'''
+            INSERT INTO {ticker}_detalhes_dividendos (fii_id, dividend_yield, ultimo_rendimento)
+            VALUES (?, ?, ?)
+        ''', (fii_id, row['Dividend Yield'], row['Rendimento']))
