@@ -51,15 +51,6 @@ class FiisinfospiderSpider(scrapy.Spider):
             'publico_alvo' : response.xpath('//*[@id="carbon_fields_fiis_informations-2"]/div[3]/p[9]/b/text()').get()
         }
 
-        for row in response.css(".yieldChart__table__bloco"):
-            yield {
-                "Data Base": row.css(".table__linha:nth-child(1)::text").get(),
-                "Data Pagamento": row.css(".table__linha:nth-child(2)::text").get(),
-                "Cotação Base": row.css(".table__linha:nth-child(3)::text").get(),
-                "Dividend Yield": row.css(".table__linha:nth-child(4)::text").get(),
-                "Rendimento": row.css(".table__linha:nth-child(5)::text").get(),
-            }
-
 
     def extrair_dados_tabela_yield(response):
         dados = []
