@@ -43,6 +43,7 @@ def extrair_variacao(variacao_element):
 
 def remover_ponto(numero_com_ponto):
     return numero_com_ponto.replace('.', '')
+    
 
 
 def tratar_detalhes(detalhes):
@@ -59,3 +60,4 @@ def tratar_detalhes(detalhes):
             detalhes_tratados[chave] = remover_ponto(valor)
 
     return detalhes_tratados
+
