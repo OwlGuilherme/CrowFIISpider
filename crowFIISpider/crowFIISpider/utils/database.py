@@ -15,37 +15,26 @@ def criar_db():
         ''')
 
         conn.execute('''
+            CREATE TABLE IF NOT EXISTS historico_dividendos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fii_id INTEGER,
+                data_base DATE,
+                data_pagamento DATE,
+                cotacao_base DECIMAL(10, 2),
+                dividend_yield DECIMAL(4, 2),
+                rendimento DECIMAL(10, 2),
+                FOREIGN KEY(fii_id) REFERENCES fiis(id)
+            )
+        ''')
+
+        conn.execute('''
             CREATE TABLE IF NOT EXISTS detalhes_fiis (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fii_id INTEGER,
                 ticker TEXT,
                 nome TEXT,
                 dividend_yield REAL,
-                ultimo_rendimento REAL,
-                patrimonio_liquido REAL,
-                pvp TEXT,
-                cotacao_atual REAL,
-                mudanca REAL,
-                min_52_seman REAL,
-                max_52_seman REAL,
-                variacao REAL,
-                valor_em_caixa REAL,
-                liquidez_media_diaria REAL,
-                valor_patrimonial_p_cota REAL,
-                num_cotistas REAL,
-                participacao_ifix REAL,
-                administrador TEXT,
-                cnpj_adm TEXT,
-                cnpj TEXT,
-                nome_pregao TEXT,
-                num_cotas REAL,
-                patrimonio REAL,
-                tipo_anbima TEXT,
-                segmen_anbima TEXT,
-                segmento TEXT,
-                tipo_gestao TEXT,
-                publico_alvo TEXT,
-                FOREIGN KEY(fii_id) REFERENCES fiis(id)
+                ...
             )
         ''')
 
