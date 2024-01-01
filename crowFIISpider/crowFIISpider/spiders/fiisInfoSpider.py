@@ -2,12 +2,17 @@ from typing import Any, Iterable, Optional
 import scrapy
 import pandas as pd
 from scrapy.http import Request
-from crowFIISpider.utils.database import carregar_links, inserir_dados_detalhados
+from crowFIISpider.utils.database import carregar_links, inserir_dados_detalhados, salvar_tabela_dividendos
 from crowFIISpider.utils.tratamento_dados import extrair_variacao
+import sqlite3
 
 
 class FiisinfospiderSpider(scrapy.Spider):
     name = "fiisInfoSpider"
+
+    def __init__(self, *args, **kwargs):
+        super(FiisinfospiderSpider, self).__init__(*args, **kwargs)
+        self.conn = sqlite3.connect('fiis.db')
 
     def start_requests(self):
         links_df = carregar_links()
@@ -54,8 +59,12 @@ class FiisinfospiderSpider(scrapy.Spider):
         detalhes['fii_id'] = response.meta['fii_id']
         inserir_dados_detalhados(detalhes)
 
+        # Extrair e salvar tabela de dividendos
+        dados_tabela_yield = self.extrair_dados_tabela_yield(response)
+        salvar_tabela_dividendos(self.conn, detalhes['ticker'], dados_tabela_yield)
 
-    def extrair_dados_tabela_yield(response):
+
+    def extrair_dados_tabela_yield(self, response):
         dados = []
 
         for row in response.css(".yieldChart__table__bloco"):
@@ -72,3 +81,7 @@ class FiisinfospiderSpider(scrapy.Spider):
         df = pd.DataFrame(dados)
         return df
 
+def spider_closed(self, spider, reason):
+    # Fechar a conexão com o banco de dados quando a spider for fechada
+    if hasattr(self, 'conn') and self.conn is not None:
+        self.conn.close()
