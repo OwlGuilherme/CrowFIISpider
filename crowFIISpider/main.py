@@ -26,7 +26,7 @@ def exibir_menu():
     print("+-----------------------------+")
 
 def main():
-    criar_db()  # Certifique-se de que o banco de dados está criado antes de exibir o menu
+    criar_db()
 
     while True:
         exibir_menu()
