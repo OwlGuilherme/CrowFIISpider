@@ -59,7 +59,7 @@ def carregar_links():
 
         return df
     
-def inserir_dados_detalhados(detalhes_fii_data):
+def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
     try:
         with sqlite3.connect('fiis.db') as conn:
             # Verificar se os dados já existem no banco de dados
@@ -126,6 +126,20 @@ def inserir_dados_detalhados(detalhes_fii_data):
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
                     detalhes_fii_data['publico_alvo']
                 ))
+
+                # Inserir dados na tabela de histórico de dividendos
+                for _, row in dados_tabela_yield.iterrows():
+                    conn.execute('''
+                        INSERT INTO historico_dividendos (
+                            fii_id, data_base, data_pagamento, cotacao_base,
+                            dividend_yield, rendimento
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (
+                        detalhes_fii_data['fii_id'], row['Data Base'], row['Data Pagamento'],
+                        row['Cotação Base'], row['Dividend Yield'], row['Rendimento']
+                    ))
+
             conn.commit()
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
