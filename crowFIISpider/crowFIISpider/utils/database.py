@@ -72,7 +72,8 @@ def carregar_links():
         df = pd.read_sql_query(query, conn)
 
         return df
-    
+
+
 def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
     try:
         with sqlite3.connect('fiis.db') as conn:
@@ -83,6 +84,8 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
             ''', (
                 detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome']
             )).fetchone()
+
+            dados_tabela_csv = dados_tabela_yield.to_csv(index=False)  # Convertendo a tabela de dividendos para CSV
 
             if existing_data:
                 # Se os dados já existem, atualize-os em vez de inseri-los novamente
@@ -111,7 +114,7 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
                     detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
-                    detalhes_fii_data['publico_alvo'], dados_tabela_yield.to_csv(index=False),
+                    detalhes_fii_data['publico_alvo'], dados_tabela_csv,
                     existing_data[0]
                 ))
             else:
@@ -140,20 +143,7 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
                     detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
-                    detalhes_fii_data['publico_alvo'], dados_tabela_yield.to_csv(index=False)
-                ))
-
-            # Inserir dados na tabela de histórico de dividendos
-            for _, row in dados_tabela_yield.iterrows():
-                conn.execute('''
-                    INSERT INTO historico_dividendos (
-                        fii_id, data_base, data_pagamento, cotacao_base,
-                        dividend_yield, rendimento
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (
-                    detalhes_fii_data['fii_id'], row['Data Base'], row['Data Pagamento'],
-                    row['Cotação Base'], row['Dividend Yield'], row['Rendimento']
+                    detalhes_fii_data['publico_alvo'], dados_tabela_csv
                 ))
 
             conn.commit()
