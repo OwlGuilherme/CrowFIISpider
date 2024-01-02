@@ -61,3 +61,13 @@ def tratar_detalhes(detalhes):
 
     return detalhes_tratados
 
+def tratar_dados_tabela_yield(self, df):
+    df = df.replace({None: "", "\n": "" }, regex = True)
+
+    df["Data Base"] = pd.to_datetime(df["Data Base"], errors="coerce")
+    df["Data Pagamento"] = pd.to_datetime(df["Data Pagamento"], errors="coerce")
+    df["Cotação Base"] = df["Cotação Base"].str.extract(r"(\d+,\d+)").astype(float)
+    df["Dividend Yield"] = df["Dividend Yield"].str.extract(r"([\d,]+)").astype(float) / 100
+    df["Rendimento"] = df["Rendimento"].str.extract(r"(\d+,\d+)").astype(float)
+
+    return df
