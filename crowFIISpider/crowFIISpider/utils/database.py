@@ -18,9 +18,9 @@ def criar_db():
             CREATE TABLE IF NOT EXISTS historico_dividendos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fii_id INTEGER,
-                data_base TEXT,  -- Alteração para TEXT
-                data_pagamento TEXT,  -- Alteração para TEXT
-                cotacao_base REAL,  -- Alteração para REAL
+                data_base TEXT,
+                data_pagamento TEXT,
+                cotacao_base REAL,
                 dividend_yield REAL,
                 rendimento REAL,
                 FOREIGN KEY(fii_id) REFERENCES fiis(id)
@@ -150,23 +150,24 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
                     detalhes_fii_data['publico_alvo']
                 ))
-
-                # Inserir dados na tabela de histórico de dividendos
-                for _, row in dados_tabela_yield.iterrows():
-                    conn.execute('''
-                        INSERT INTO historico_dividendos (
-                            fii_id, data_base, data_pagamento, cotacao_base,
-                            dividend_yield, rendimento
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ''', (
-                        detalhes_fii_data['fii_id'], row['Data Base'], row['Data Pagamento'],
-                        row['Cotação Base'], row['Dividend Yield'], row['Rendimento']
-                    ))
+                
+            # Inserir dados na tabela de histórico de dividendos
+            for _, row in dados_tabela_yield.iterrows():
+                conn.execute('''
+                    INSERT INTO historico_dividendos (
+                        fii_id, data_base, data_pagamento, cotacao_base,
+                        dividend_yield, rendimento
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (
+                    detalhes_fii_data['fii_id'], row['Data Base'], row['Data Pagamento'],
+                    row['Cotação Base'], row['Dividend Yield'], row['Rendimento']
+                ))
 
             conn.commit()
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
+
 
 def criar_tabela_dividendos(conn, ticker):
     conn.execute(f'''
