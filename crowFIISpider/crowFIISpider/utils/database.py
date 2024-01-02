@@ -161,70 +161,6 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
 
 
-
-def criar_tabela_dividendos(conn, ticker):
-    conn.execute(f'''
-        CREATE TABLE IF NOT EXISTS {ticker}_detalhes_dividendos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fii_id INTEGER,
-            data_base TEXT,
-            data_pagamento TEXT,
-            cotacao_base TEXT,
-            dividend_yield REAL,
-            rendimento REAL,
-            FOREIGN KEY(fii_id) REFERENCES fiis(id)
-        )
-    ''')
-
-
-def salvar_tabela_dividendos(conn, ticker, dados_tabela_yield):
-    try:
-        # Obter o ID do FII
-        fii_id = obter_id_fii(conn, ticker)
-
-        # Criação da tabela de detalhes de dividendos, se não existir
-        criar_tabela_dividendos(conn, ticker)
-
-        # Inserir dados na tabela de detalhes de dividendos
-        for _, row in dados_tabela_yield.iterrows():
-            inserir_dados_dividendos(
-                conn,
-                ticker,
-                fii_id,
-                row['Data Base'],
-                row['Data Pagamento'],
-                row['Cotação Base'],
-                row['Dividend Yield'],
-                row['Rendimento']
-            )
-    except Exception as e:
-        print(f'Erro ao salvar tabela de dividendos para {ticker}: {e}')
-
-def obter_id_fii(conn, ticker):
-    # Obter o ID do FII
-    result = conn.execute('SELECT id FROM fiis WHERE ticker = ? LIMIT 1', (ticker,)).fetchone()
-
-    if not result:
-        print(f'FII {ticker} não encontrado no banco de dados.')
-        return None
-
-    return result[0]
-
-def inserir_dados_dividendos(conn, ticker, fii_id, data_base, data_pagamento, cotacao_base, dividend_yield, rendimento):
-    try:
-        conn.execute(f'''
-            INSERT INTO {ticker}_detalhes_dividendos (
-                fii_id, data_base, data_pagamento, cotacao_base, dividend_yield, rendimento
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (fii_id, data_base, data_pagamento, cotacao_base, dividend_yield, rendimento))
-        conn.commit()
-        print(f'Dados de dividendos inseridos para FII ID {fii_id}')
-    except Exception as e:
-        conn.rollback()
-        print(f'Erro ao inserir dados de dividendos: {e}')
-
-
 def spider_closed(self, spider, reason):
     # Fechar a conexão com o banco de dados quando a spider for fechada
     if hasattr(self, 'conn') and self.conn is not None:
@@ -246,3 +182,4 @@ def extrair_dados_tabela_yield(self, response):
     # Criando um DataFrame do Pandas
     df = pd.DataFrame(dados)
     return df
+
