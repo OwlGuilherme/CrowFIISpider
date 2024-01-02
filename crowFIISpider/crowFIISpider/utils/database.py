@@ -95,7 +95,8 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                         num_cotistas = ?, participacao_ifix = ?, administrador = ?,
                         cnpj_adm = ?, cnpj = ?, nome_pregao = ?, num_cotas = ?,
                         patrimonio = ?, tipo_anbima = ?, segmen_anbima = ?,
-                        segmento = ?, tipo_gestao = ?, publico_alvo = ?
+                        segmento = ?, tipo_gestao = ?, publico_alvo = ?,
+                        dados_tabela = ?
                     WHERE id = ?
                 ''', (
                     detalhes_fii_data['dividend_yield'], detalhes_fii_data['ultimo_rendimento'],
@@ -110,7 +111,8 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
                     detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
-                    detalhes_fii_data['publico_alvo'], existing_data[0]
+                    detalhes_fii_data['publico_alvo'], dados_tabela_yield.to_csv(index=False),
+                    existing_data[0]
                 ))
             else:
                 # Se os dados não existem, insira-os normalmente
@@ -121,9 +123,9 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                         valor_em_caixa, liquidez_media_diaria, valor_patrimonial_p_cota,
                         num_cotistas, participacao_ifix, administrador, cnpj_adm, cnpj,
                         nome_pregao, num_cotas, patrimonio, tipo_anbima, segmen_anbima,
-                        segmento, tipo_gestao, publico_alvo
+                        segmento, tipo_gestao, publico_alvo, dados_tabela
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome'],
                     detalhes_fii_data['dividend_yield'], detalhes_fii_data['ultimo_rendimento'],
@@ -138,9 +140,9 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['num_cotas'], detalhes_fii_data['patrimonio'],
                     detalhes_fii_data['tipo_anbima'], detalhes_fii_data['segmen_anbima'],
                     detalhes_fii_data['segmento'], detalhes_fii_data['tipo_gestao'],
-                    detalhes_fii_data['publico_alvo']
+                    detalhes_fii_data['publico_alvo'], dados_tabela_yield.to_csv(index=False)
                 ))
-                
+
             # Inserir dados na tabela de histórico de dividendos
             for _, row in dados_tabela_yield.iterrows():
                 conn.execute('''
@@ -157,6 +159,7 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
             conn.commit()
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
+
 
 
 def criar_tabela_dividendos(conn, ticker):
