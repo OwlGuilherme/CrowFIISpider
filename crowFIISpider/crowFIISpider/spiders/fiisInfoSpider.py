@@ -3,7 +3,7 @@ import scrapy
 import pandas as pd
 from scrapy.http import Request
 from crowFIISpider.utils.database import carregar_links, inserir_dados_detalhados
-from crowFIISpider.utils.tratamento_dados import extrair_variacao
+from crowFIISpider.utils.tratamento_dados import extrair_variacao, tratar_dados_tabela_yield
 import sqlite3
 
 
@@ -80,6 +80,9 @@ class FiisinfospiderSpider(scrapy.Spider):
 
         # Criando um DataFrame do Pandas
         df = pd.DataFrame(dados)
+
+        df = self.tratar_dados_tabela_yield(df)
+
         return df
 
 def spider_closed(self, spider, reason):
