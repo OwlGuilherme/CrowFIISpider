@@ -57,10 +57,13 @@ class FiisinfospiderSpider(scrapy.Spider):
         }
 
         detalhes['fii_id'] = response.meta['fii_id']
-        inserir_dados_detalhados(detalhes)
+        
 
         # Extrair e salvar tabela de dividendos
         dados_tabela_yield = self.extrair_dados_tabela_yield(response)
+
+        inserir_dados_detalhados(detalhes, dados_tabela_yield)
+
         salvar_tabela_dividendos(self.conn, detalhes['ticker'], dados_tabela_yield)
 
 
