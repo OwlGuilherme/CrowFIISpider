@@ -1,7 +1,6 @@
 import sqlite3
 import pandas as pd
-import csv
-from io import StringIO
+import json
 
 
 def criar_db():
@@ -85,7 +84,7 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                 detalhes_fii_data['fii_id'], detalhes_fii_data['ticker'], detalhes_fii_data['nome']
             )).fetchone()
 
-            dados_tabela_csv = dados_tabela_yield.to_csv(index=False)  # Convertendo a tabela de dividendos para CSV
+            dados_tabela_json = dados_tabela_yield.to_json(orient='records')
 
             if existing_data:
                 # Se os dados já existem, atualize-os em vez de inseri-los novamente
@@ -120,7 +119,8 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                         segmento = ?,
                         tipo_gestao = ?,
                         publico_alvo = ?,
-                        dados_tabela = ?
+                        dados_tabela = ?,
+                        dados_tabela_json = ?
                     WHERE id = ?
                 ''', (
                     detalhes_fii_data['fii_id'],
@@ -151,7 +151,8 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['segmento'],
                     detalhes_fii_data['tipo_gestao'],
                     detalhes_fii_data['publico_alvo'],
-                    dados_tabela_csv,
+                    dados_tabela_yield.to_csv(index=False),
+                    dados_tabela_json,
                     existing_data[0]
                 ))
             else:
@@ -163,7 +164,7 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                         valor_em_caixa, liquidez_media_diaria, valor_patrimonial_P_cota,
                         num_cotistas, participacao_ifix, administrador, cnpj_adm, cnpj,
                         nome_pregao, num_cotas, patrimonio, tipo_anbima, segmen_anbima,
-                        segmento, tipo_gestao, publico_alvo, dados_tabela
+                        segmento, tipo_gestao, publico_alvo, dados_tabela, dados_tabela_json
                     )
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
@@ -195,14 +196,14 @@ def inserir_dados_detalhados(detalhes_fii_data, dados_tabela_yield):
                     detalhes_fii_data['segmento'],
                     detalhes_fii_data['tipo_gestao'],
                     detalhes_fii_data['publico_alvo'],
-                    dados_tabela_csv
+                    dados_tabela_yield.to_csv(index=False),
+                    dados_tabela_json
                 ))
 
             conn.commit()
     except Exception as e:
         print(f'Erro ao inserir dados detalhados no banco de dados: {e}')
-
-
+        
 
 def spider_closed(self, spider, reason):
     # Fechar a conexão com o banco de dados quando a spider for fechada
