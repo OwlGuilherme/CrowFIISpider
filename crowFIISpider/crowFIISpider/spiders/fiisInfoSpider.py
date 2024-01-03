@@ -81,9 +81,8 @@ class FiisinfospiderSpider(scrapy.Spider):
         # Criando um DataFrame do Pandas
         df = pd.DataFrame(dados)
 
-        df = self.tratar_dados_tabela_yield(df)
-
-        return df
+        df_tratado = tratar_dados_tabela_yield(df)
+        return df_tratado
 
 def spider_closed(self, spider, reason):
     # Fechar a conexão com o banco de dados quando a spider for fechada
