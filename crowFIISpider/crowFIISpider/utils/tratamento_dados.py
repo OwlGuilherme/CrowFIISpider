@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def converte_valor(valor_monetario):
     # Mapeia os sufixos para os fatores multiplicativos
@@ -61,13 +62,37 @@ def tratar_detalhes(detalhes):
 
     return detalhes_tratados
 
-def tratar_dados_tabela_yield(self, df):
-    df = df.replace({None: "", "\n": "" }, regex = True)
+def tratar_dados_tabela_yield(df):
+    if df is None or df.empty:
+        return df
 
-    df["Data Base"] = pd.to_datetime(df["Data Base"], errors="coerce")
-    df["Data Pagamento"] = pd.to_datetime(df["Data Pagamento"], errors="coerce")
-    df["Cotação Base"] = df["Cotação Base"].str.extract(r"(\d+,\d+)").astype(float)
-    df["Dividend Yield"] = df["Dividend Yield"].str.extract(r"([\d,]+)").astype(float) / 100
-    df["Rendimento"] = df["Rendimento"].str.extract(r"(\d+,\d+)").astype(float)
+    # Verificar valores inválidos na coluna "Data Base"
+    invalid_dates = df[df["Data Base"].apply(lambda x: not pd.to_datetime(x, errors='coerce', dayfirst=True) is pd.NaT)]
+    print("Valores inválidos na coluna 'Data Base':", invalid_dates)
+
+    # Substituir valores nulos ou strings vazias
+    df = df.replace({None: "", "\n": ""}, regex=True)
+
+    # Remover linhas com todas as células vazias
+    df = df.dropna(how="all")
+
+    # Tratar a coluna 'Cotação Base' para converter para float
+    df["Cotação Base"] = pd.to_numeric(df["Cotação Base"].replace({",": ".", "R\$": ""}, regex=True), errors="coerce")
+
+    # Tratar a coluna 'Dividend Yield' para remover caracteres não numéricos
+    df["Dividend Yield"] = pd.to_numeric(df["Dividend Yield"].str.replace('%', '').replace(",", ".", regex=True), errors="coerce") / 100
+
+    # Tratar a coluna 'Rendimento' para remover caracteres não numéricos
+    df["Rendimento"] = pd.to_numeric(df["Rendimento"].str.replace("R\$", "").replace(",", ".", regex=True), errors="coerce")
+
+    # Tratar a coluna 'Data Base' para converter para data e lidar com datas inválidas
+    df["Data Base"] = pd.to_datetime(df["Data Base"], format="%d.%m.%Y", errors="coerce", dayfirst=True)
+
+    # Tratar a coluna 'Data Pagamento' para converter para data e lidar com datas inválidas
+    df["Data Pagamento"] = pd.to_datetime(df["Data Pagamento"], format="%d.%m.%Y", errors="coerce", dayfirst=True)
+
+    print("DataFrame tratado:")
+    print(df)
 
     return df
+
