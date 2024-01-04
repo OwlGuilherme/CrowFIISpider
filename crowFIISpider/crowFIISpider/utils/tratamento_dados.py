@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 def converte_valor(valor_monetario):
     # Mapeia os sufixos para os fatores multiplicativos
@@ -47,52 +48,54 @@ def remover_ponto(numero_com_ponto):
     
 
 
-def tratar_detalhes(detalhes):
-    detalhes_tratados = {}
-
-    for chave, valor in detalhes.items():
-        if chave in ['dividend_yield', 'ultimo_rendimento', 'P/VP', 'cotacao_atual', 'mudança', 'min_52_seman',  'max_52_seman', 'variacao',  'liquidez_media_diaria', 'valor_patrimonial_P_cota', 'participacao_ifix', ]:
-            detalhes_tratados[chave] = substituir_virgula(valor)
-
-        elif chave in ['patrimonio_liquido', 'valor_em_caixa']:
-            detalhes_tratados[chave] = converte_valor(valor)
-
-        elif chave in ['num_cotistas', 'num_cotas', 'patrimonio']:
-            detalhes_tratados[chave] = remover_ponto(valor)
-
-    return detalhes_tratados
-
 def tratar_dados_tabela_yield(df):
-    if df is None or df.empty:
-        return df
+    for i, row in df.iterrows():
+        # Tratar as datas
+        try:
+            # Ajustar o formato da data (remover "\n" e converter para datetime)
+            data_base_str = row['Data Base']
+            if pd.notna(data_base_str):
+                df.at[i, 'Data Base'] = datetime.strptime(data_base_str.replace('\n', ''), '%d.%m.%Y').date().isoformat()
+            else:
+                df.at[i, 'Data Base'] = None
 
-    # Verificar valores inválidos na coluna "Data Base"
-    invalid_dates = df[df["Data Base"].apply(lambda x: not pd.to_datetime(x, errors='coerce', dayfirst=True) is pd.NaT)]
-    print("Valores inválidos na coluna 'Data Base':", invalid_dates)
+            data_pagamento_str = row['Data Pagamento']
+            if pd.notna(data_pagamento_str):
+                df.at[i, 'Data Pagamento'] = datetime.strptime(data_pagamento_str.replace('\n', ''), '%d.%m.%Y').date().isoformat()
+            else:
+                df.at[i, 'Data Pagamento'] = None
 
-    # Substituir valores nulos ou strings vazias
-    df = df.replace({None: "", "\n": ""}, regex=True)
+        except ValueError:
+            df.at[i, 'Data Base'] = None
+            df.at[i, 'Data Pagamento'] = None
 
-    # Remover linhas com todas as células vazias
-    df = df.dropna(how="all")
+        # Tratar os valores numéricos
+        try:
+            # Ajustar o formato do número fracionário (substituir "," por "." e converter para float)
+            cotacao_base_str = row['Cotação Base']
+            if pd.notna(cotacao_base_str):
+                df.at[i, 'Cotação Base'] = float(cotacao_base_str.replace('R$', '').replace(',', '.').strip())
+            else:
+                df.at[i, 'Cotação Base'] = None
 
-    # Tratar a coluna 'Cotação Base' para converter para float
-    df["Cotação Base"] = pd.to_numeric(df["Cotação Base"].replace({",": ".", "R\$": ""}, regex=True), errors="coerce")
+            dividend_yield_str = row['Dividend Yield']
+            if pd.notna(dividend_yield_str):
+                df.at[i, 'Dividend Yield'] = float(dividend_yield_str.replace('%', '').replace(',', '.').strip()) / 100
+            else:
+                df.at[i, 'Dividend Yield'] = None
 
-    # Tratar a coluna 'Dividend Yield' para remover caracteres não numéricos
-    df["Dividend Yield"] = pd.to_numeric(df["Dividend Yield"].str.replace('%', '').replace(",", ".", regex=True), errors="coerce") / 100
-
-    # Tratar a coluna 'Rendimento' para remover caracteres não numéricos
-    df["Rendimento"] = pd.to_numeric(df["Rendimento"].str.replace("R\$", "").replace(",", ".", regex=True), errors="coerce")
-
-    # Tratar a coluna 'Data Base' para converter para data e lidar com datas inválidas
-    df["Data Base"] = pd.to_datetime(df["Data Base"], format="%d.%m.%Y", errors="coerce", dayfirst=True)
-
-    # Tratar a coluna 'Data Pagamento' para converter para data e lidar com datas inválidas
-    df["Data Pagamento"] = pd.to_datetime(df["Data Pagamento"], format="%d.%m.%Y", errors="coerce", dayfirst=True)
-
-    print("DataFrame tratado:")
-    print(df)
+            # Tratar o campo de rendimento
+            rendimento_str = row['Rendimento']
+            if pd.notna(rendimento_str):
+                df.at[i, 'Rendimento'] = float(rendimento_str.replace('R$', '').replace(',', '.').strip())
+            else:
+                df.at[i, 'Rendimento'] = None
+        except ValueError:
+            df.at[i, 'Cotação Base'] = None
+            df.at[i, 'Dividend Yield'] = None
+            df.at[i, 'Rendimento'] = None
 
     return df
+
+    
 
