@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 import polars as pl
+import json
 
 
 def criar_db():
@@ -225,7 +226,7 @@ def extrair_dados_tabela_yield(self, response):
     return df
 
 
-def carregar_dividendos(ticker):
+def carregar_dividendos():
 
     ticker = input("Digite o ticker do FII desejado: ").upper()
 
@@ -235,13 +236,18 @@ def carregar_dividendos(ticker):
                 SELECT dados_tabela_json
                 FROM detalhes_fiis
                 WHERE ticker = ?    
-            '''
+            '''            
 
             result = conn.execute(query, (ticker,)).fetchone()
 
+            pl.Config.set_tbl_rows(100)
+
             if result:
                 dados_tabela_json = result[0]
-                df = pl.read_json(dados_tabela_json)
+                
+                json_data =  json.loads(dados_tabela_json)
+
+                df = pl.DataFrame(json_data)
 
                 print(df)
             else:
