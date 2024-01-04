@@ -60,29 +60,34 @@ class FiisinfospiderSpider(scrapy.Spider):
         
 
         # Extrair e salvar tabela de dividendos
-        dados_tabela_yield = self.extrair_dados_tabela_yield(response)
+        dados_tabela_yield = extrair_dados_tabela_yield(response)
 
         inserir_dados_detalhados(detalhes, dados_tabela_yield)
 
 
-    def extrair_dados_tabela_yield(self, response):
-        dados = []
+def extrair_dados_tabela_yield(self, response):
+    dados = []
 
-        for row in response.css(".yieldChart__table__bloco"):
-            dado = {
-                "Data Base": row.css(".table__linha:nth-child(1)::text").get(),
-                "Data Pagamento": row.css(".table__linha:nth-child(2)::text").get(),
-                "Cotação Base": row.css(".table__linha:nth-child(3)::text").get(),
-                "Dividend Yield": row.css(".table__linha:nth-child(4)::text").get(),
-                "Rendimento": row.css(".table__linha:nth-child(5)::text").get(),
-            }
-            dados.append(dado)
+    for row in response.css(".yieldChart__table__bloco"):
+        dado = {
+            "Data Base": row.css(".table__linha:nth-child(1)::text").get().strip(),
+            "Data Pagamento": row.css(".table__linha:nth-child(2)::text").get().strip(),
+            "Cotação Base": row.css(".table__linha:nth-child(3)::text").get().strip(),
+            "Dividend Yield": row.css(".table__linha:nth-child(4)::text").get().strip(),
+            "Rendimento": row.css(".table__linha:nth-child(5)::text").get().strip(),
+        }
+        dados.append(dado)
 
-        # Criando um DataFrame do Pandas
-        df = pd.DataFrame(dados)
+    # Criando um DataFrame do Pandas
+    df = pd.DataFrame(dados)
 
-        df_tratado = tratar_dados_tabela_yield(df)
-        return df_tratado
+    # Tratando os dados com a função existente
+    df_tratado = tratar_dados_tabela_yield(df)
+
+    # Convertendo o DataFrame tratado para JSON
+    dados_json = df_tratado.to_json(orient='records')
+
+    return dados_json
 
 def spider_closed(self, spider, reason):
     # Fechar a conexão com o banco de dados quando a spider for fechada
