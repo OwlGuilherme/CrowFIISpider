@@ -80,7 +80,8 @@ def tratar_dados_tabela_yield(df):
 
             dividend_yield_str = row['Dividend Yield']
             if pd.notna(dividend_yield_str):
-                df.at[i, 'Dividend Yield'] = float(dividend_yield_str.replace('%', '').replace(',', '.').strip()) / 100
+                # Modificação para lidar com diferentes formatos de percentagem
+                df.at[i, 'Dividend Yield'] = float(dividend_yield_str.replace('%', '').replace(',', '.').strip())
             else:
                 df.at[i, 'Dividend Yield'] = None
 

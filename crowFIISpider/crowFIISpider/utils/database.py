@@ -46,7 +46,7 @@ def criar_db():
             segmento TEXT,
             tipo_gestao TEXT,
             publico_alvo TEXT,
-            dados_tabela_json TEXT,  -- Nova coluna para armazenar dados detalhados como CSV
+            dados_tabela_json TEXT,
             FOREIGN KEY(fii_id) REFERENCES fiis(id)
         )
     ''')
