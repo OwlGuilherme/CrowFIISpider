@@ -1,6 +1,6 @@
 import sqlite3
 import pandas as pd
-import json
+import polars as pl
 
 
 def criar_db():
@@ -224,3 +224,30 @@ def extrair_dados_tabela_yield(self, response):
     df = pd.DataFrame(dados)
     return df
 
+
+def carregar_dividendos(ticker):
+
+    ticker = input("Digite o ticker do FII desejado: ").upper()
+
+    try:
+        with sqlite3.connect('fiis.db') as conn:
+            query = f'''
+                SELECT dados_tabela_json
+                FROM detalhes_fiis
+                WHERE ticker = ?    
+            '''
+
+            result = conn.execute(query, (ticker,)).fetchone()
+
+            if result:
+                dados_tabela_json = result[0]
+                df = pl.read_json(dados_tabela_json)
+
+                print(df)
+            else:
+                print(f"Não foram encontrados dados para o FII com o ticker {ticker}")
+
+    except Exception as e:
+        print(f"Erro ao recuperar dados do banco de dados: {e}")
+
+        
