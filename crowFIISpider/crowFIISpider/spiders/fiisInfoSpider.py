@@ -17,17 +17,8 @@ class FiisinfospiderSpider(scrapy.Spider):
     def start_requests(self):
         links_df = carregar_links()
 
-        # Trecho de testes
-
-        num_links_teste = 10  # Defina o número desejado de links para teste
-
-        for index, row in links_df.head(num_links_teste).iterrows():
+        for index, row in links_df.iterrows():
             yield scrapy.Request(url=row['link'], callback=self.parse, meta={'fii_id': row['id']})
-
-        ####    
-
-        '''for index, row in links_df.iterrows():
-            yield scrapy.Request(url=row['link'], callback=self.parse, meta={'fii_id': row['id']})'''
 
     
     def parse(self, response):
