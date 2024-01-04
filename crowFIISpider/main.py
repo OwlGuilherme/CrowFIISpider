@@ -1,7 +1,7 @@
 from scrapy.crawler import CrawlerProcess
 from crowFIISpider.spiders.fiis import FiisSpider
 from crowFIISpider.spiders.fiisInfoSpider import FiisinfospiderSpider
-from crowFIISpider.utils.database import criar_db, inserir_dados
+from crowFIISpider.utils.database import criar_db, carregar_dividendos
 from scrapy.utils.project import get_project_settings
 
 def raspar_dados():
@@ -22,7 +22,8 @@ def exibir_menu():
     print("+- - - - - - - - - - - - - - -+")
     print("| 1. Raspar dados novamente   |")
     print("| 2. Raspar dados detalhados  |")
-    print("| 3. Sair                     |")
+    print("| 3. Histórico de dividendos  |")
+    print("| 4. Sair                     |")
     print("+-----------------------------+")
 
 def main():
@@ -36,7 +37,9 @@ def main():
             raspar_dados()
         elif opcao == "2":
             raspar_dados_detalhados()
-        elif opcao == "3":
+        elif opcao == '3':
+            carregar_dividendos()
+        elif opcao == "4":
             print("Saindo...")
             break
         else:
@@ -44,3 +47,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
