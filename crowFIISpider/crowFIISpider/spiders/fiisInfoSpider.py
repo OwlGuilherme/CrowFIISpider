@@ -1,6 +1,7 @@
 from typing import Any, Iterable, Optional
 import scrapy
 import pandas as pd
+import polars as pl
 from scrapy.http import Request
 from crowFIISpider.utils.database import carregar_links, inserir_dados_detalhados
 from crowFIISpider.utils.tratamento_dados import extrair_variacao, tratar_dados_tabela_yield
@@ -15,10 +16,14 @@ class FiisinfospiderSpider(scrapy.Spider):
         self.conn = sqlite3.connect('fiis.db')
 
     def start_requests(self):
+        pl.Config.set_tbl_rows(600)
+    
         links_df = carregar_links()
 
-        for index, row in links_df.iterrows():
-            yield scrapy.Request(url=row['link'], callback=self.parse, meta={'fii_id': row['id']})
+        print(links_df)
+
+        for row in links_df.iter_rows():
+            yield scrapy.Request(url=row[1], callback=self.parse, meta={'fii_id': row[0]})
 
     
     def parse(self, response):
@@ -94,8 +99,8 @@ class FiisinfospiderSpider(scrapy.Spider):
 
         return dados_json
 
-def spider_closed(self, spider, reason):
-    # Fechar a conexão com o banco de dados quando a spider for fechada
-    if hasattr(self, 'conn') and self.conn is not None:
-        self.conn.close()
+    def spider_closed(self, spider, reason):
+        # Fechar a conexão com o banco de dados quando a spider for fechada
+        if hasattr(self, 'conn') and self.conn is not None:
+            self.conn.close()
 
