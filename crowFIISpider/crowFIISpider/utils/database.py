@@ -1,7 +1,6 @@
 import json
 import sqlite3
 
-import pandas as pd
 import polars as pl
 
 
@@ -72,7 +71,7 @@ def inserir_dados(fii_data):
                     fii_data["tipo"],
                     fii_data["nome"],
                 ),
-            )
+            ) 
             conn.commit()
     except Exception as e:
         print(f"Erro ao inserir dados no banco de dados: {e}")
@@ -81,7 +80,10 @@ def inserir_dados(fii_data):
 def carregar_links():
     with sqlite3.connect("fiis.db") as conn:
         query = "SELECT id, link FROM fiis"
-        df = pd.read_sql_query(query, conn)
+        
+        df = pl.read_database(query=query, connection=conn)
+
+        #df = pd.read_sql_query(query, conn)
 
         return df
 
@@ -246,7 +248,7 @@ def extrair_dados_tabela_yield(self, response):
         dados.append(dado)
 
     # Criando um DataFrame do Pandas
-    df = pd.DataFrame(dados)
+    df = pl.DataFrame(dados)
     return df
 
 
